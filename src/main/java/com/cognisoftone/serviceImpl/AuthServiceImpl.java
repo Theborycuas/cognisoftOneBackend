@@ -9,6 +9,9 @@ import com.cognisoftone.response.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import com.cognisoftone.model.RoleModel;
 import com.cognisoftone.model.UserModel;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +23,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private final AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -46,8 +51,12 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
+        String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
         return new AuthResponse(
-                null, // JWT token (pendiente de implementar)
+                jwtToken,
+                refreshToken,
                 user.getEmail(),
                 roleModels.stream().map(RoleModel::getName).collect(Collectors.toSet())
         );
@@ -56,7 +65,25 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest request) {
-        return null;
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+
+        UserModel user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+        String jwtToken = jwtService.generateToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        return new AuthResponse(
+                jwtToken,
+                refreshToken,
+                user.getEmail(),
+                user.getRoleModels().stream().map(RoleModel::getName).collect(Collectors.toSet())
+        );
     }
 }
 
