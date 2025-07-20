@@ -1,4 +1,4 @@
-package com.cognisoftone.serviceImpl;
+package com.cognisoftone.serviceImpl.auth;
 
 import com.cognisoftone.model.UserModel;
 import com.cognisoftone.repository.UserRepository;

@@ -1,4 +1,4 @@
-package com.cognisoftone.request;
+package com.cognisoftone.request.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

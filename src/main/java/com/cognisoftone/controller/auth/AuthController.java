@@ -1,11 +1,9 @@
 package com.cognisoftone.controller.auth;
 
-import com.cognisoftone.request.LoginRequest;
-import com.cognisoftone.request.RegisterRequest;
-import com.cognisoftone.interfaces.AuthService;
+import com.cognisoftone.request.auth.LoginRequest;
+import com.cognisoftone.request.auth.RegisterRequest;
+import com.cognisoftone.interfaces.auth.AuthService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

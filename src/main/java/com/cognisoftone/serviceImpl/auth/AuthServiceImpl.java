@@ -1,11 +1,14 @@
-package com.cognisoftone.serviceImpl;
+package com.cognisoftone.serviceImpl.auth;
 
-import com.cognisoftone.interfaces.AuthService;
+import com.cognisoftone.interfaces.auth.AuthService;
+import com.cognisoftone.interfaces.auth.TokenRepository;
+import com.cognisoftone.model.TokenModel;
+import com.cognisoftone.model.TokenType;
 import com.cognisoftone.repository.RoleRepository;
 import com.cognisoftone.repository.UserRepository;
-import com.cognisoftone.request.LoginRequest;
-import com.cognisoftone.request.RegisterRequest;
-import com.cognisoftone.response.AuthResponse;
+import com.cognisoftone.request.auth.LoginRequest;
+import com.cognisoftone.request.auth.RegisterRequest;
+import com.cognisoftone.response.auth.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import com.cognisoftone.model.RoleModel;
 import com.cognisoftone.model.UserModel;
@@ -28,6 +31,7 @@ public class AuthServiceImpl implements AuthService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final TokenRepository tokenRepository;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -54,6 +58,14 @@ public class AuthServiceImpl implements AuthService {
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
 
+        TokenModel tokenModel = new TokenModel();
+        tokenModel.setToken(refreshToken);
+        tokenModel.setUser(user);
+        tokenModel.setTokenType(TokenType.BEARER);
+        tokenModel.setRevoked(false);
+        tokenModel.setExpired(false);
+        tokenRepository.save(tokenModel);
+
         return new AuthResponse(
                 jwtToken,
                 refreshToken,
@@ -77,6 +89,14 @@ public class AuthServiceImpl implements AuthService {
 
         String jwtToken = jwtService.generateToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
+
+        TokenModel tokenModel = new TokenModel();
+        tokenModel.setToken(refreshToken);
+        tokenModel.setUser(user);
+        tokenModel.setTokenType(TokenType.BEARER);
+        tokenModel.setRevoked(false);
+        tokenModel.setExpired(false);
+        tokenRepository.save(tokenModel);
 
         return new AuthResponse(
                 jwtToken,
