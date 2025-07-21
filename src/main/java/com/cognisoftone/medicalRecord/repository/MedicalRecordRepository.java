@@ -15,5 +15,8 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Lo
     List<MedicalRecord> findByPatientIdAndCreatedAtBetween(Long patientId, LocalDateTime from, LocalDateTime to);
 
     List<MedicalRecord> findByPatientIdAndTestId(Long patientId, Long testId);
+
+    boolean existsByPatientIdAndPsychologistIdAndAppointmentId(Long patientId, Long psychologistId, Long appointmentId);
+
 }
 

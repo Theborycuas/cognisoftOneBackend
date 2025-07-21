@@ -1,5 +1,7 @@
 package com.cognisoftone.psychologicalTest.service;
 
+import com.cognisoftone.medicalRecord.model.MedicalRecord;
+import com.cognisoftone.medicalRecord.repository.MedicalRecordRepository;
 import com.cognisoftone.psychologicalTest.interfaces.TestService;
 import com.cognisoftone.psychologicalTest.model.QuestionModel;
 import com.cognisoftone.psychologicalTest.model.TestAssignment;
@@ -35,6 +37,7 @@ public class TestServiceImpl implements TestService {
     private final QuestionRepository questionRepository;
     private final TestResponseRepository testResponseRepository;
     private final TestResultRepository testResultRepository;
+    private final MedicalRecordRepository medicalRecordRepository;
 
     @Override
     public TestModel createTest(TestModel test) {
@@ -174,7 +177,23 @@ public class TestServiceImpl implements TestService {
             result.setAutoSummary(resumen);
             result.setObservations(""); // editable luego
 
-            testResultRepository.save(result);
+            TestResult savedResult = testResultRepository.save(result);
+
+            //Crear historia clínica automática vinculada al test
+            MedicalRecord autoRecord = new MedicalRecord();
+            autoRecord.setPatientId(user.getId());
+            autoRecord.setPsychologistId(null); // aún no lo hay
+            autoRecord.setTestId(savedResult.getTestId());
+            autoRecord.setAppointmentId(null); // test externo
+            autoRecord.setContext("Test respondido vía link externo.");
+            autoRecord.setFindings("Auto-generado. Requiere revisión profesional.");
+            autoRecord.setDiagnosis(null);
+            autoRecord.setRecommendations(null);
+            autoRecord.setPsychologistNotes(null);
+            autoRecord.setReviewed(false);
+            autoRecord.setCreatedAt(LocalDateTime.now());
+
+            medicalRecordRepository.save(autoRecord);
         }
     }
 

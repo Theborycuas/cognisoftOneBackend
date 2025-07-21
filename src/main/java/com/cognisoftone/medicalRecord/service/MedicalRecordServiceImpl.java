@@ -20,6 +20,19 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     @Override
     public MedicalRecordResponse create(CreateMedicalRecordRequest request) {
+        // Validación: evitar duplicados
+        boolean alreadyExists = medicalRecordRepository
+                .existsByPatientIdAndPsychologistIdAndAppointmentId(
+                        request.getPatientId(),
+                        request.getPsychologistId(),
+                        request.getAppointmentId()
+                );
+
+        if (alreadyExists) {
+            throw new RuntimeException("Ya existe una historia clínica registrada para esta cita.");
+        }
+
+
         MedicalRecord record = new MedicalRecord();
         record.setPatientId(request.getPatientId());
         record.setPsychologistId(request.getPsychologistId());
@@ -35,6 +48,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         MedicalRecord saved = medicalRecordRepository.save(record);
         return mapToResponse(saved);
     }
+
 
     @Override
     public List<MedicalRecordResponse> getByPatientId(Long patientId) {
