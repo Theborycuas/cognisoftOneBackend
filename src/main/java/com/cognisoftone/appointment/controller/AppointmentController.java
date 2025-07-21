@@ -4,11 +4,13 @@ import com.cognisoftone.appointment.interfaces.AppointmentService;
 import com.cognisoftone.appointment.request.CreateAppointmentRequest;
 import com.cognisoftone.appointment.request.UpdateSessionNotesRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.logging.Logger;
 
 @RestController
@@ -71,4 +73,33 @@ public class AppointmentController {
         log.info("END UPDATE SESSION NOTES FOR APPOINTMENT");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    @RequestMapping(
+            value = "/psychologist/{id}/range",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> getByPsychologistAndRange(
+            @PathVariable Long id,
+            @RequestParam("from") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime from,
+            @RequestParam("to") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime to) {
+
+        log.info("START GET APPOINTMENTS BY PSYCHOLOGIST AND RANGE");
+        var response = appointmentService.getByPsychologistIdAndDateRange(id, from, to);
+        log.info("END GET APPOINTMENTS BY PSYCHOLOGIST AND RANGE");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(
+            value = "/{id}/cancel",
+            method = RequestMethod.PUT,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> cancelAppointment(@PathVariable Long id) {
+        log.info("START CANCEL APPOINTMENT ID " + id);
+        var response = appointmentService.cancelAppointment(id);
+        log.info("END CANCEL APPOINTMENT");
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
 }

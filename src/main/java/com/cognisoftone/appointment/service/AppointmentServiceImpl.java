@@ -10,6 +10,7 @@ import com.cognisoftone.appointment.response.AppointmentResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -56,6 +57,31 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setStatus(request.getStatus());
 
         Appointment updated = appointmentRepository.save(appointment);
+        return mapToResponse(updated);
+    }
+
+    @Override
+    public List<AppointmentResponse> getByPsychologistIdAndDateRange(Long psychologistId, LocalDateTime from, LocalDateTime to) {
+        return appointmentRepository.findByPsychologistIdAndStartTimeBetween(psychologistId, from, to).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<AppointmentResponse> getByPatientIdAndDateRange(Long patientId, LocalDateTime from, LocalDateTime to) {
+        return appointmentRepository.findByPatientIdAndStartTimeBetween(patientId, from, to).stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public AppointmentResponse cancelAppointment(Long id) {
+        Appointment appointment = appointmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+
+        appointment.setStatus(AppointmentStatus.CANCELED);
+        Appointment updated = appointmentRepository.save(appointment);
+
         return mapToResponse(updated);
     }
 
