@@ -3,7 +3,7 @@ package com.cognisoftone.auth.controller;
 import com.cognisoftone.auth.request.LoginRequest;
 import com.cognisoftone.auth.request.RefreshTokenRequest;
 import com.cognisoftone.auth.request.RegisterRequest;
-import com.cognisoftone.auth.interfaz.AuthService;
+import com.cognisoftone.auth.interfaces.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

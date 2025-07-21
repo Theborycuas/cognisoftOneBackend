@@ -1,4 +1,4 @@
-package com.cognisoftone.auth.interfaz;
+package com.cognisoftone.auth.interfaces;
 
 import com.cognisoftone.auth.request.LoginRequest;
 import com.cognisoftone.auth.request.RefreshTokenRequest;

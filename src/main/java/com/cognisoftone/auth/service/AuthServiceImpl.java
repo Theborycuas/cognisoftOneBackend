@@ -1,7 +1,7 @@
 package com.cognisoftone.auth.service;
 
-import com.cognisoftone.auth.interfaz.AuthService;
-import com.cognisoftone.auth.interfaz.TokenRepository;
+import com.cognisoftone.auth.interfaces.AuthService;
+import com.cognisoftone.auth.interfaces.TokenRepository;
 import com.cognisoftone.auth.model.TokenModel;
 import com.cognisoftone.auth.model.TokenType;
 import com.cognisoftone.users.repository.RoleRepository;
