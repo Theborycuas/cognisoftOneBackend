@@ -26,6 +26,8 @@ public class UserModel implements UserDetails {
 
     private String firstName;
     private String lastName;
+
+    @Column(unique = true, nullable = false)
     private String identification;
     private String phone;
     private String address;
