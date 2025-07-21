@@ -3,12 +3,15 @@ package com.cognisoftone.psychologicalTest.controller;
 import com.cognisoftone.psychologicalTest.interfaces.TestService;
 import com.cognisoftone.psychologicalTest.model.TestModel;
 import com.cognisoftone.psychologicalTest.request.AssignTestRequest;
+import com.cognisoftone.psychologicalTest.request.SubmitTestRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/psycologicalTests")
@@ -78,4 +81,21 @@ public class TestController {
         log.info("END GET TEST BY TOKEN");
         return ResponseEntity.ok(response);
     }
+
+    @RequestMapping(
+            value = "/fill/{token}",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> submitTest(
+            @PathVariable String token,
+            @RequestBody SubmitTestRequest request
+    ) {
+        log.info("START SUBMIT TEST");
+        testService.submitTestResponse(token, request);
+        log.info("END SUBMIT TEST");
+        return ResponseEntity.ok(Map.of("message", "Test submitted successfully"));
+    }
+
 }
