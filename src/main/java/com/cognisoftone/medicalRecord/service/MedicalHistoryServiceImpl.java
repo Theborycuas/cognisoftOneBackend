@@ -90,7 +90,6 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
         dto.setId(appointment.getId());
         dto.setPatientId(appointment.getPatientId());
         dto.setPsychologistId(appointment.getPsychologistId());
-        dto.setDateTime(appointment.getDateTime());
         dto.setDurationMinutes(appointment.getDurationMinutes());
         dto.setStatus(appointment.getStatus());
         dto.setSessionNotes(appointment.getSessionNotes());

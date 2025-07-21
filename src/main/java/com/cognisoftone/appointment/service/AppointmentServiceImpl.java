@@ -7,6 +7,8 @@ import com.cognisoftone.appointment.repository.AppointmentRepository;
 import com.cognisoftone.appointment.request.CreateAppointmentRequest;
 import com.cognisoftone.appointment.request.UpdateSessionNotesRequest;
 import com.cognisoftone.appointment.response.AppointmentResponse;
+import com.cognisoftone.users.model.UserModel;
+import com.cognisoftone.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,14 +21,39 @@ import java.util.stream.Collectors;
 public class AppointmentServiceImpl implements AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
+    private final UserRepository userRepository;
 
     @Override
     public AppointmentResponse create(CreateAppointmentRequest request) {
+        UserModel psychologist = userRepository.findById(request.getPsychologistId())
+                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
+
+        boolean isPsychologist = psychologist.getRoleModels().stream()
+                .anyMatch(role -> role.getName().equals("PSYCHOLOGIST"));
+
+        if (!isPsychologist) {
+            throw new RuntimeException("User is not authorized as a psychologist");
+        }
+
+        // Validar conflictos de horario
+        List<Appointment> conflicts = appointmentRepository.findConflictingAppointments(
+                request.getPsychologistId(),
+                request.getPatientId(),
+                request.getStartTime(),
+                request.getEndTime()
+        );
+
+        if (!conflicts.isEmpty()) {
+            throw new RuntimeException("There is already an appointment scheduled in this time range.");
+        }
+
+        // Crear cita
         Appointment appointment = new Appointment();
         appointment.setPatientId(request.getPatientId());
         appointment.setPsychologistId(request.getPsychologistId());
         appointment.setStartTime(request.getStartTime());
         appointment.setEndTime(request.getEndTime());
+        appointment.setCreatedAt(LocalDateTime.now());
         appointment.setReason(request.getReason());
         appointment.setStatus(AppointmentStatus.SCHEDULED);
 
