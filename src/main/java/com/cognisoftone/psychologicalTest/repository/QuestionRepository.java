@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface QuestionRepository extends JpaRepository<QuestionModel, Long> {
 
-    List<QuestionModel> findByTestId(Long testId);
+    List<QuestionModel> findByTest_Id(Long testId);
 
     void deleteByTestId(Long testId);
 }

@@ -4,6 +4,7 @@ package com.cognisoftone.appointment.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 
 @Data
@@ -29,6 +30,9 @@ public class Appointment {
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status; // SCHEDULED, CANCELED, COMPLETED
+
+    private LocalDateTime DateTime;
+    private Time DurationMinutes;
 
     private LocalDateTime createdAt;
 

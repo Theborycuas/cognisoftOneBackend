@@ -3,6 +3,7 @@ package com.cognisoftone.appointment.response;
 import com.cognisoftone.appointment.model.AppointmentStatus;
 import lombok.Data;
 
+import java.sql.Time;
 import java.time.LocalDateTime;
 
 @Data
@@ -14,6 +15,10 @@ public class AppointmentResponse {
     private LocalDateTime endTime;
     private String reason;
     private String sessionNotes;
+    private LocalDateTime DateTime;
+    private Time DurationMinutes;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private AppointmentStatus status;
 }
 

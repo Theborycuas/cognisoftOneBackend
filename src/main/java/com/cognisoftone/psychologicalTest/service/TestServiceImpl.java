@@ -4,12 +4,10 @@ import com.cognisoftone.psychologicalTest.interfaces.TestService;
 import com.cognisoftone.psychologicalTest.model.QuestionModel;
 import com.cognisoftone.psychologicalTest.model.TestAssignment;
 import com.cognisoftone.psychologicalTest.model.TestModel;
+import com.cognisoftone.psychologicalTest.model.TestResult;
 import com.cognisoftone.psychologicalTest.model.answers.TestAnswer;
 import com.cognisoftone.psychologicalTest.model.answers.TestResponse;
-import com.cognisoftone.psychologicalTest.repository.QuestionRepository;
-import com.cognisoftone.psychologicalTest.repository.TestAssignmentRepository;
-import com.cognisoftone.psychologicalTest.repository.TestRepository;
-import com.cognisoftone.psychologicalTest.repository.TestResponseRepository;
+import com.cognisoftone.psychologicalTest.repository.*;
 import com.cognisoftone.psychologicalTest.request.AssignTestRequest;
 import com.cognisoftone.psychologicalTest.request.SubmitTestRequest;
 import com.cognisoftone.psychologicalTest.response.AssignTestResponse;
@@ -36,11 +34,24 @@ public class TestServiceImpl implements TestService {
     private final UserRepository userRepository;
     private final QuestionRepository questionRepository;
     private final TestResponseRepository testResponseRepository;
+    private final TestResultRepository testResultRepository;
 
     @Override
     public TestModel createTest(TestModel test) {
         test.setActive(true);
-        return testRepository.save(test);
+
+        // Guarda solo el test para obtener el ID
+        TestModel savedTest = testRepository.save(test);
+
+        // Setea el test en cada pregunta y guarda todas las preguntas
+        if (test.getQuestions() != null) {
+            for (QuestionModel question : test.getQuestions()) {
+                question.setTest(savedTest);
+            }
+        }
+
+        // Vuelve a guardar el test con las preguntas actualizadas
+        return testRepository.save(savedTest);
     }
 
     @Override
@@ -148,6 +159,27 @@ public class TestServiceImpl implements TestService {
         // Mark assignment as completed
         assignment.setFilled(true);
         assignmentRepository.save(assignment);
+
+        //Generate Test Result
+        boolean alreadyExists = testResultRepository
+                .findByTestIdAndPatientId(assignment.getTest().getId(), user.getId())
+                .isPresent();
+
+        if (!alreadyExists) {
+            TestResult result = new TestResult();
+            result.setTestId(assignment.getTest().getId());
+            result.setPatientId(user.getId());
+
+            String resumen = generarResumenAuto(testResponse); // opcional
+            result.setAutoSummary(resumen);
+            result.setObservations(""); // editable luego
+
+            testResultRepository.save(result);
+        }
+    }
+
+    private String generarResumenAuto(TestResponse response) {
+        return "Test completado con " + response.getAnswers().size() + " respuestas el " + response.getSubmittedAt();
     }
 
 
