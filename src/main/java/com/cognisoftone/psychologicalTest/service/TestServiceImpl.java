@@ -4,6 +4,9 @@ import com.cognisoftone.common.exception.InvalidTokenException;
 import com.cognisoftone.common.exception.UnprocessableEntityException;
 import com.cognisoftone.medicalRecord.model.MedicalRecord;
 import com.cognisoftone.medicalRecord.repository.MedicalRecordRepository;
+import com.cognisoftone.psychologicalTest.dto.CompletedTestDetailDTO;
+import com.cognisoftone.psychologicalTest.dto.CompletedTestSummaryDTO;
+import com.cognisoftone.psychologicalTest.dto.TestAnswerDTO;
 import com.cognisoftone.psychologicalTest.interfaces.TestService;
 import com.cognisoftone.psychologicalTest.model.QuestionModel;
 import com.cognisoftone.psychologicalTest.model.TestAssignment;
@@ -205,7 +208,45 @@ public class TestServiceImpl implements TestService {
         return "Test completado con " + response.getAnswers().size() + " respuestas el " + response.getSubmittedAt();
     }
 
+    @Override
+    public List<CompletedTestSummaryDTO> getCompletedTestsByUser(Long userId) {
+        return testResponseRepository.findByUser_Id(userId).stream()
+                .map(response -> {
+                    CompletedTestSummaryDTO dto = new CompletedTestSummaryDTO();
+                    dto.setTestId(response.getTest().getId());
+                    dto.setTestName(response.getTest().getName());
+                    dto.setSubmittedAt(response.getSubmittedAt());
+                    dto.setTestResultId(getResultId(response.getTest().getId(), userId)); // si deseas
+                    return dto;
+                }).collect(Collectors.toList());
+    }
 
+    @Override
+    public CompletedTestDetailDTO getCompletedTestDetail(Long userId, Long testId) {
+        TestResponse response = testResponseRepository.findByTest_IdAndUser_Id(testId, userId)
+                .orElseThrow(() -> new EntityNotFoundException("Test no encontrado"));
+
+        List<TestAnswerDTO> answers = response.getAnswers().stream().map(answer -> {
+            TestAnswerDTO dto = new TestAnswerDTO();
+            dto.setQuestionId(answer.getQuestion().getId());
+            dto.setQuestion(answer.getQuestion().getStatement());
+            dto.setAnswer(answer.getAnswer());
+            return dto;
+        }).collect(Collectors.toList());
+
+        CompletedTestDetailDTO detail = new CompletedTestDetailDTO();
+        detail.setTestId(testId);
+        detail.setTestName(response.getTest().getName());
+        detail.setSubmittedAt(response.getSubmittedAt());
+        detail.setAnswers(answers);
+        return detail;
+    }
+
+    private Long getResultId(Long testId, Long userId) {
+        return testResultRepository.findByTestIdAndPatientId(testId, userId)
+                .map(TestResult::getId)
+                .orElse(null);
+    }
 
 }
 

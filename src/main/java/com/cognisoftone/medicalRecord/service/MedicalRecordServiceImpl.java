@@ -1,11 +1,14 @@
 package com.cognisoftone.medicalRecord.service;
 
+import com.cognisoftone.appointment.repository.AppointmentRepository;
 import com.cognisoftone.common.exception.DuplicateResourceException;
 import com.cognisoftone.medicalRecord.interfaces.MedicalRecordService;
 import com.cognisoftone.medicalRecord.model.MedicalRecord;
 import com.cognisoftone.medicalRecord.repository.MedicalRecordRepository;
 import com.cognisoftone.medicalRecord.request.CreateMedicalRecordRequest;
 import com.cognisoftone.medicalRecord.response.MedicalRecordResponse;
+import com.cognisoftone.users.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,10 +21,27 @@ import java.util.stream.Collectors;
 public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     private final MedicalRecordRepository medicalRecordRepository;
+    private final UserRepository userRepository;
+    private final AppointmentRepository appointmentRepository;
 
     @Override
     public MedicalRecordResponse create(CreateMedicalRecordRequest request) {
-        // Validación: evitar duplicados
+
+        // Validar existencia del paciente
+        userRepository.findById(request.getPatientId())
+                .orElseThrow(() -> new EntityNotFoundException("El paciente no existe."));
+
+        // Validar existencia del psicólogo
+        userRepository.findById(request.getPsychologistId())
+                .orElseThrow(() -> new EntityNotFoundException("El psicólogo no existe."));
+
+        // Validar existencia de la cita (si se envía)
+        if (request.getAppointmentId() != null) {
+            appointmentRepository.findById(request.getAppointmentId())
+                    .orElseThrow(() -> new EntityNotFoundException("La cita no existe."));
+        }
+
+        // Validar duplicado por paciente + psicólogo + cita
         boolean alreadyExists = medicalRecordRepository
                 .existsByPatientIdAndPsychologistIdAndAppointmentId(
                         request.getPatientId(),
@@ -33,7 +53,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new DuplicateResourceException("Ya existe una historia clínica registrada para esta cita.");
         }
 
-
+        // Crear el registro clínico
         MedicalRecord record = new MedicalRecord();
         record.setPatientId(request.getPatientId());
         record.setPsychologistId(request.getPsychologistId());
@@ -49,6 +69,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         MedicalRecord saved = medicalRecordRepository.save(record);
         return mapToResponse(saved);
     }
+
 
 
     @Override

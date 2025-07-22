@@ -10,7 +10,11 @@ import com.cognisoftone.medicalRecord.model.MedicalRecord;
 import com.cognisoftone.medicalRecord.repository.MedicalRecordRepository;
 import com.cognisoftone.medicalRecord.response.MedicalRecordResponse;
 import com.cognisoftone.medicalRecord.response.PatientMedicalHistoryResponse;
+import com.cognisoftone.psychologicalTest.dto.TestAnswerDTO;
 import com.cognisoftone.psychologicalTest.model.TestResult;
+import com.cognisoftone.psychologicalTest.model.answers.TestAnswer;
+import com.cognisoftone.psychologicalTest.repository.TestAnswerRepository;
+import com.cognisoftone.psychologicalTest.repository.TestRepository;
 import com.cognisoftone.psychologicalTest.repository.TestResultRepository;
 import com.cognisoftone.psychologicalTest.response.TestResultResponse;
 import com.cognisoftone.users.repository.UserRepository;
@@ -30,13 +34,14 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
     private final AppointmentRepository appointmentRepository;
     private final TestResultRepository testResultRepository;
     private final MedicalRecordRepository medicalRecordRepository;
+    private final TestAnswerRepository testAnswerRepository;
+    private final TestRepository testRepository;
 
     @Override
     public PatientMedicalHistoryResponse getFullHistoryByPatientId(Long patientId) {
 
         var user = userRepository.findById(patientId)
                 .orElseThrow(() -> new EntityNotFoundException("Patient with ID " + patientId + " was not found."));
-
 
         // Armar datos del paciente
         PatientBasicInfoDTO patient = new PatientBasicInfoDTO();
@@ -60,9 +65,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
                     if (record.getAppointmentId() != null) {
                         event.setType("CITA");
                         appointmentRepository.findById(record.getAppointmentId())
-                                .ifPresent(app -> {
-                                    event.setAppointment(mapToAppointmentResponse(app));
-                                });
+                                .ifPresent(app -> event.setAppointment(mapToAppointmentResponse(app)));
                     } else if (record.getTestId() != null) {
                         event.setType("TEST");
                         testResultRepository.findByTestIdAndPatientId(record.getTestId(), patientId)
@@ -78,6 +81,7 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
                 })
                 .sorted(Comparator.comparing(MedicalEventDTO::getDate))
                 .collect(Collectors.toList());
+
 
         // Respuesta final
         PatientMedicalHistoryResponse response = new PatientMedicalHistoryResponse();
@@ -110,6 +114,25 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
         dto.setCompletedAt(result.getCompletedAt());
         dto.setCreatedAt(result.getCreatedAt());
         dto.setUpdatedAt(result.getUpdatedAt());
+
+        // Nombre del test
+        testRepository.findById(result.getTestId())
+                .ifPresent(test -> dto.setTestName(test.getName()));
+
+        // Respuestas del test
+        List<TestAnswer> answers = testAnswerRepository
+                .findByResponse_Test_IdAndResponse_User_Id(result.getTestId(), result.getPatientId());
+
+        List<TestAnswerDTO> answerDTOs = answers.stream().map(answer -> {
+            TestAnswerDTO a = new TestAnswerDTO();
+            a.setQuestionId(answer.getQuestion().getId());
+            a.setQuestion(answer.getQuestion().getStatement());
+            a.setAnswer(answer.getAnswer());
+            return a;
+        }).collect(Collectors.toList());
+
+        dto.setAnswers(answerDTOs);
+
         return dto;
     }
 
