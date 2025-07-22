@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,10 +19,8 @@ import java.util.List;
 public class TestResponse {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    private LocalDateTime submittedAt;
 
     @ManyToOne
     private UserModel user;
@@ -29,7 +28,9 @@ public class TestResponse {
     @ManyToOne
     private TestModel test;
 
-    @OneToMany(mappedBy = "response", cascade = CascadeType.ALL)
-    private List<TestAnswer> answers;
+    private LocalDateTime submittedAt;
+
+    @OneToMany(mappedBy = "response", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TestAnswer> answers = new ArrayList<>();
 }
 

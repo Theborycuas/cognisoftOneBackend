@@ -71,7 +71,7 @@ public class TestController {
     }
 
     @RequestMapping(
-            value = "/fill/{token}",
+            value = "/link/{token}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -83,7 +83,7 @@ public class TestController {
     }
 
     @RequestMapping(
-            value = "/fill/{token}",
+            value = "/link/{token}",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE

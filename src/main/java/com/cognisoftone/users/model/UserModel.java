@@ -39,6 +39,14 @@ public class UserModel implements UserDetails {
 
     private Boolean consent;
 
+    private boolean emailVerified = false;
+
+    private String emailVerificationToken;
+
+    private LocalDateTime emailVerificationTokenGeneratedAt;
+
+    private boolean enabled = true;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_roles",
@@ -47,9 +55,7 @@ public class UserModel implements UserDetails {
     )
     private Set<RoleModel> roleModels = new HashSet<>();
 
-
     private LocalDateTime createdAt;
-
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -96,6 +102,6 @@ public class UserModel implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return this.enabled;
     }
 }

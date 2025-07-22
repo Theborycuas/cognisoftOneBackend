@@ -38,6 +38,14 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new AccessDeniedException("User is not authorized as a psychologist");
         }
 
+        // Validar que no sea en el pasado o dentro de 1 hora
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startTime = request.getStartTime();
+
+        if (startTime.isBefore(now.plusHours(1))) {
+            throw new UnprocessableEntityException("Appointments must be scheduled at least 1 hour in advance.");
+        }
+
         // Validar conflictos de horario
         List<Appointment> conflicts = appointmentRepository.findConflictingAppointments(
                 request.getPsychologistId(),
@@ -59,6 +67,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setCreatedAt(LocalDateTime.now());
         appointment.setReason(request.getReason());
         appointment.setStatus(AppointmentStatus.SCHEDULED);
+        appointment.setDurationMinutes(request.getDurationMinutes());
 
         Appointment saved = appointmentRepository.save(appointment);
         return mapToResponse(saved);

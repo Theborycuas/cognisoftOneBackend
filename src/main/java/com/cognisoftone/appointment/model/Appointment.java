@@ -31,7 +31,7 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status; // SCHEDULED, CANCELED, COMPLETED
 
-    private Time DurationMinutes;
+    private Integer durationMinutes;
 
     private LocalDateTime createdAt;
 

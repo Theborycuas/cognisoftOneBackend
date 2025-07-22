@@ -89,7 +89,7 @@ public class TestServiceImpl implements TestService {
 
         assignmentRepository.save(assignment);
 
-        String link = "https://tusistema.com/api/test/fill/" + token;
+        String link = "https://tusistema.com/psycologicalTests/link/" + token;
 
         return new AssignTestResponse(link, expiresAt);
     }

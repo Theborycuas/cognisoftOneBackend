@@ -16,7 +16,7 @@ public class AppointmentResponse {
     private String reason;
     private String sessionNotes;
     private LocalDateTime DateTime;
-    private Time DurationMinutes;
+    private Integer durationMinutes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private AppointmentStatus status;
