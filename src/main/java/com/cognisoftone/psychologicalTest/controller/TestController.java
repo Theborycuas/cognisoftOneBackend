@@ -1,5 +1,7 @@
 package com.cognisoftone.psychologicalTest.controller;
 
+import com.cognisoftone.psychologicalTest.dto.CompletedTestDetailDTO;
+import com.cognisoftone.psychologicalTest.dto.CompletedTestSummaryDTO;
 import com.cognisoftone.psychologicalTest.interfaces.TestService;
 import com.cognisoftone.psychologicalTest.model.TestModel;
 import com.cognisoftone.psychologicalTest.request.AssignTestRequest;
@@ -11,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -71,7 +74,7 @@ public class TestController {
     }
 
     @RequestMapping(
-            value = "/fill/{token}",
+            value = "/link/{token}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
@@ -83,7 +86,7 @@ public class TestController {
     }
 
     @RequestMapping(
-            value = "/fill/{token}",
+            value = "/link/{token}",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -96,6 +99,35 @@ public class TestController {
         testService.submitTestResponse(token, request);
         log.info("END SUBMIT TEST");
         return ResponseEntity.ok(Map.of("message", "Test submitted successfully"));
+    }
+
+    @RequestMapping(
+            value = "/completed/{userId}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<List<CompletedTestSummaryDTO>> getCompletedTestsByUser(
+            @PathVariable Long userId
+    ) {
+        log.info("START getCompletedTestsByUser for userId {}", userId);
+        List<CompletedTestSummaryDTO> tests = testService.getCompletedTestsByUser(userId);
+        log.info("END getCompletedTestsByUser for userId {}", userId);
+        return ResponseEntity.ok(tests);
+    }
+
+    @RequestMapping(
+            value = "/completed/{userId}/{testId}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<CompletedTestDetailDTO> getCompletedTestDetail(
+            @PathVariable Long userId,
+            @PathVariable Long testId
+    ) {
+        log.info("START getCompletedTestDetail for userId {} and testId {}", userId, testId);
+        CompletedTestDetailDTO detail = testService.getCompletedTestDetail(userId, testId);
+        log.info("END getCompletedTestDetail for userId {} and testId {}", userId, testId);
+        return ResponseEntity.ok(detail);
     }
 
 }

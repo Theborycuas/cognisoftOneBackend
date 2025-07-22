@@ -23,6 +23,9 @@ public class TestAssignment {
     private LocalDateTime expiresAt;
     private boolean filled;
 
+    @Column(nullable = false)
+    private Long psychologistId;
+
     @ManyToOne
     private TestModel test;
 }
