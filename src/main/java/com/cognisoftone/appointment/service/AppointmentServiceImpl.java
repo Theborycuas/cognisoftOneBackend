@@ -7,9 +7,12 @@ import com.cognisoftone.appointment.repository.AppointmentRepository;
 import com.cognisoftone.appointment.request.CreateAppointmentRequest;
 import com.cognisoftone.appointment.request.UpdateSessionNotesRequest;
 import com.cognisoftone.appointment.response.AppointmentResponse;
+import com.cognisoftone.common.exception.UnprocessableEntityException;
 import com.cognisoftone.users.model.UserModel;
 import com.cognisoftone.users.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -26,13 +29,13 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentResponse create(CreateAppointmentRequest request) {
         UserModel psychologist = userRepository.findById(request.getPsychologistId())
-                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Psychologist not found"));
 
         boolean isPsychologist = psychologist.getRoleModels().stream()
                 .anyMatch(role -> role.getName().equals("PSYCHOLOGIST"));
 
         if (!isPsychologist) {
-            throw new RuntimeException("User is not authorized as a psychologist");
+            throw new AccessDeniedException("User is not authorized as a psychologist");
         }
 
         // Validar conflictos de horario
@@ -44,7 +47,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         );
 
         if (!conflicts.isEmpty()) {
-            throw new RuntimeException("There is already an appointment scheduled in this time range.");
+            throw new UnprocessableEntityException("Ya existe una cita agendada en este rango de tiempo.");
         }
 
         // Crear cita
@@ -78,7 +81,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentResponse updateNotes(Long id, UpdateSessionNotesRequest request) {
         Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
 
         appointment.setSessionNotes(request.getSessionNotes());
         appointment.setStatus(request.getStatus());
@@ -104,7 +107,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public AppointmentResponse cancelAppointment(Long id) {
         Appointment appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Appointment not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
 
         appointment.setStatus(AppointmentStatus.CANCELED);
         Appointment updated = appointmentRepository.save(appointment);

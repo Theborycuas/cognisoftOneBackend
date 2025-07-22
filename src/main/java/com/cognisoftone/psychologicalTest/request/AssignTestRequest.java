@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class AssignTestRequest {
     private Long testId;
     private int validDays; // días de validez del link
-
+    private Long psychologistId;
 }

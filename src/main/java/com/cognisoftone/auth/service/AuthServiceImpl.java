@@ -4,12 +4,15 @@ import com.cognisoftone.auth.interfaces.AuthService;
 import com.cognisoftone.auth.interfaces.TokenRepository;
 import com.cognisoftone.auth.model.TokenModel;
 import com.cognisoftone.auth.model.TokenType;
+import com.cognisoftone.common.exception.DuplicateResourceException;
+import com.cognisoftone.common.exception.InvalidTokenException;
 import com.cognisoftone.users.repository.RoleRepository;
 import com.cognisoftone.users.repository.UserRepository;
 import com.cognisoftone.auth.request.LoginRequest;
 import com.cognisoftone.auth.request.RefreshTokenRequest;
 import com.cognisoftone.auth.request.RegisterRequest;
 import com.cognisoftone.auth.response.AuthResponse;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.cognisoftone.users.model.RoleModel;
 import com.cognisoftone.users.model.UserModel;
@@ -38,10 +41,19 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse register(RegisterRequest request) {
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new DuplicateResourceException("Ya existe un usuario con el email: " + request.getEmail());
+        }
+
+        if (userRepository.existsByIdentification(request.getIdentification())) {
+            throw new DuplicateResourceException("Ya existe un usuario con la identificación: " + request.getIdentification());
+        }
+
         Set<RoleModel> roleModels = new HashSet<>();
         for (String roleName : request.getRoles()) {
             RoleModel roleModel = roleRepository.findByName(roleName)
-                    .orElseThrow(() -> new RuntimeException("Role not found: " + roleName));
+                    .orElseThrow(() -> new EntityNotFoundException("Role not found: " + roleName));
             roleModels.add(roleModel);
         }
 
@@ -119,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
 
         boolean isValid = jwtService.isTokenValid(refreshToken, user);
         if (!isValid) {
-            throw new RuntimeException("Invalid refresh token");
+            throw new InvalidTokenException("Invalid refresh token");
         }
 
         tokenRepository.findByToken(refreshToken).ifPresent(token -> {

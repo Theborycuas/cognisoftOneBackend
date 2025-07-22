@@ -1,5 +1,7 @@
 package com.cognisoftone.psychologicalTest.service;
 
+import com.cognisoftone.common.exception.InvalidTokenException;
+import com.cognisoftone.common.exception.UnprocessableEntityException;
 import com.cognisoftone.medicalRecord.model.MedicalRecord;
 import com.cognisoftone.medicalRecord.repository.MedicalRecordRepository;
 import com.cognisoftone.psychologicalTest.interfaces.TestService;
@@ -16,6 +18,7 @@ import com.cognisoftone.psychologicalTest.response.AssignTestResponse;
 import com.cognisoftone.psychologicalTest.response.FillTestResponse;
 import com.cognisoftone.users.model.UserModel;
 import com.cognisoftone.users.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -70,7 +73,7 @@ public class TestServiceImpl implements TestService {
     @Override
     public AssignTestResponse assignTest(AssignTestRequest request) {
         TestModel test = testRepository.findById(request.getTestId())
-                .orElseThrow(() -> new RuntimeException("Test not found"));
+                .orElseThrow(() -> new EntityNotFoundException("Test with id " + request.getTestId() + " not found"));
 
         String token = UUID.randomUUID().toString();
         LocalDateTime now = LocalDateTime.now();
@@ -82,6 +85,7 @@ public class TestServiceImpl implements TestService {
         assignment.setCreatedAt(now);
         assignment.setExpiresAt(expiresAt);
         assignment.setFilled(false);
+        assignment.setPsychologistId(request.getPsychologistId());
 
         assignmentRepository.save(assignment);
 
@@ -92,14 +96,14 @@ public class TestServiceImpl implements TestService {
 
     public FillTestResponse getTestByToken(String token) {
         TestAssignment assignment = assignmentRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Token inválido"));
+                .orElseThrow(() -> new InvalidTokenException("Token inválido"));
 
         if (assignment.isFilled()) {
-            throw new RuntimeException("Este test ya fue completado.");
+            throw new UnprocessableEntityException("This test has already been completed.");
         }
 
         if (assignment.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("El enlace ha expirado.");
+            throw new UnprocessableEntityException("The test link has expired.");
         }
 
         TestModel test = assignment.getTest();
@@ -114,14 +118,14 @@ public class TestServiceImpl implements TestService {
     @Transactional
     public void submitTestResponse(String token, SubmitTestRequest request) {
         TestAssignment assignment = assignmentRepository.findByToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid token"));
+                .orElseThrow(() -> new InvalidTokenException("Invalid token"));
 
         if (assignment.isFilled()) {
-            throw new RuntimeException("This test has already been completed.");
+            throw new UnprocessableEntityException("This test has already been completed.");
         }
 
         if (assignment.getExpiresAt().isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("This test link has expired.");
+            throw new UnprocessableEntityException("The test link has expired.");
         }
 
         // Find or create user
@@ -146,7 +150,7 @@ public class TestServiceImpl implements TestService {
 
         for (SubmitTestRequest.AnswerDTO dto : request.getAnswers()) {
             QuestionModel question = questionRepository.findById(dto.getQuestionId())
-                    .orElseThrow(() -> new RuntimeException("Question not found: " + dto.getQuestionId()));
+                    .orElseThrow(() -> new EntityNotFoundException("Question not found: " + dto.getQuestionId()));
 
             TestAnswer answer = new TestAnswer();
             answer.setQuestion(question);
@@ -182,7 +186,7 @@ public class TestServiceImpl implements TestService {
             //Crear historia clínica automática vinculada al test
             MedicalRecord autoRecord = new MedicalRecord();
             autoRecord.setPatientId(user.getId());
-            autoRecord.setPsychologistId(null); // aún no lo hay
+            autoRecord.setPsychologistId(assignment.getPsychologistId());
             autoRecord.setTestId(savedResult.getTestId());
             autoRecord.setAppointmentId(null); // test externo
             autoRecord.setContext("Test respondido vía link externo.");

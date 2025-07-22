@@ -1,5 +1,6 @@
 package com.cognisoftone.medicalRecord.service;
 
+import com.cognisoftone.common.exception.DuplicateResourceException;
 import com.cognisoftone.medicalRecord.interfaces.MedicalRecordService;
 import com.cognisoftone.medicalRecord.model.MedicalRecord;
 import com.cognisoftone.medicalRecord.repository.MedicalRecordRepository;
@@ -29,7 +30,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 );
 
         if (alreadyExists) {
-            throw new RuntimeException("Ya existe una historia clínica registrada para esta cita.");
+            throw new DuplicateResourceException("Ya existe una historia clínica registrada para esta cita.");
         }
 
 

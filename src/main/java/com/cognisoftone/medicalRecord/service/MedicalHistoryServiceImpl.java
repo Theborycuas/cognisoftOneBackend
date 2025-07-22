@@ -14,6 +14,7 @@ import com.cognisoftone.psychologicalTest.model.TestResult;
 import com.cognisoftone.psychologicalTest.repository.TestResultRepository;
 import com.cognisoftone.psychologicalTest.response.TestResultResponse;
 import com.cognisoftone.users.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +35,8 @@ public class MedicalHistoryServiceImpl implements MedicalHistoryService {
     public PatientMedicalHistoryResponse getFullHistoryByPatientId(Long patientId) {
 
         var user = userRepository.findById(patientId)
-                .orElseThrow(() -> new RuntimeException("Paciente no encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Patient with ID " + patientId + " was not found."));
+
 
         // Armar datos del paciente
         PatientBasicInfoDTO patient = new PatientBasicInfoDTO();
