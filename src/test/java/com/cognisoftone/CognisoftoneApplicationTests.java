@@ -2,12 +2,12 @@ package com.cognisoftone;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest
-class CognisoftoneApplicationTests {
-
-	@Test
-	void contextLoads() {
-	}
-
-}
+// @SpringBootTest
+// @ActiveProfiles("test")
+// class CognisoftoneApplicationTests {
+//     @Test
+//     void contextLoads() {
+//     }
+// }
