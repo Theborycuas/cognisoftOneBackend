@@ -1,14 +1,12 @@
-# Usa la imagen oficial de OpenJDK
-FROM eclipse-temurin:17-jdk
-
-# Define el directorio de trabajo
+# Etapa 1: build
+FROM maven:3.9.6-eclipse-temurin-17 AS builder
 WORKDIR /app
+COPY . .
+RUN mvn clean package -DskipTests
 
-# Copia el jar generado al contenedor
-COPY target/*.jar app.jar
-
-# Exponer el puerto (Railway lo ignora, pero es buena práctica)
+# Etapa 2: runtime
+FROM eclipse-temurin:17-jdk
+WORKDIR /app
+COPY --from=builder /app/target/*.jar app.jar
 EXPOSE 8080
-
-# Comando de ejecución
 ENTRYPOINT ["java", "-jar", "app.jar"]
