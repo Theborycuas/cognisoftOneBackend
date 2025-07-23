@@ -10,8 +10,14 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResponse {
-    private String token;
-    private String refreshToken;
+    private String displayName;
     private String email;
     private Set<String> roles;
+    private String idToken;
+    private String refreshToken;
+    private long expiresIn;
+    private boolean registered;
+    private String kind;
+    private String localId;
+    private String avatarUrl;
 }

@@ -4,6 +4,7 @@ import com.cognisoftone.auth.request.LoginRequest;
 import com.cognisoftone.auth.request.RefreshTokenRequest;
 import com.cognisoftone.auth.request.RegisterRequest;
 import com.cognisoftone.auth.interfaces.AuthService;
+import com.cognisoftone.auth.response.AuthResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -45,7 +46,7 @@ public class AuthController {
     )
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         log.info("START LOGIN");
-        var response = authService.login(request);
+        AuthResponse response = authService.login(request);
         log.info("END LOGIN");
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

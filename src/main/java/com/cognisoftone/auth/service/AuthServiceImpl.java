@@ -4,6 +4,7 @@ import com.cognisoftone.auth.interfaces.AuthService;
 import com.cognisoftone.auth.interfaces.TokenRepository;
 import com.cognisoftone.auth.model.TokenModel;
 import com.cognisoftone.auth.model.TokenType;
+import com.cognisoftone.auth.response.AuthRegisterResponse;
 import com.cognisoftone.common.exception.DuplicateResourceException;
 import com.cognisoftone.common.exception.InvalidTokenException;
 import com.cognisoftone.users.repository.RoleRepository;
@@ -16,6 +17,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import com.cognisoftone.users.model.RoleModel;
 import com.cognisoftone.users.model.UserModel;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -39,8 +41,11 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final TokenRepository tokenRepository;
 
+    @Value("${jwt.expiration}")
+    private long jwtExpiration;
+
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public AuthRegisterResponse register(RegisterRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new DuplicateResourceException("Ya existe un usuario con el email: " + request.getEmail());
@@ -81,11 +86,9 @@ public class AuthServiceImpl implements AuthService {
         tokenModel.setExpired(false);
         tokenRepository.save(tokenModel);
 
-        return new AuthResponse(
+        return new AuthRegisterResponse(
                 jwtToken,
-                refreshToken,
-                user.getEmail(),
-                roleModels.stream().map(RoleModel::getName).collect(Collectors.toSet())
+                refreshToken
         );
     }
 
@@ -114,10 +117,16 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.save(tokenModel);
 
         return new AuthResponse(
+                user.getFirstName() + user.getLastName(),
+                user.getEmail(),
+                user.getRoleModels().stream().map(RoleModel::getName).collect(Collectors.toSet()),
                 jwtToken,
                 refreshToken,
-                user.getEmail(),
-                user.getRoleModels().stream().map(RoleModel::getName).collect(Collectors.toSet())
+                jwtExpiration,
+                user.isEnabled(),
+                "qmt6dRyipIad8UCc0QpMV2MENSy1",
+                "identitytoolkit#VerifyPasswordResponse",
+                "qmt6dRyipIad8UCc0QpMV2MENSy1"
         );
     }
 
@@ -152,12 +161,16 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.save(tokenModel);
 
         return new AuthResponse(
-                newToken,
-                newRefreshToken,
+                user.getFirstName() + user.getLastName(),
                 user.getEmail(),
-                user.getRoleModels().stream()
-                        .map(RoleModel::getName)
-                        .collect(Collectors.toSet())
+                user.getRoleModels().stream().map(RoleModel::getName).collect(Collectors.toSet()),
+                newToken,
+                refreshToken,
+                jwtExpiration,
+                user.isEnabled(),
+                "qmt6dRyipIad8UCc0QpMV2MENSy1",
+                "identitytoolkit#VerifyPasswordResponse",
+                "qmt6dRyipIad8UCc0QpMV2MENSy1"
         );
     }
 
