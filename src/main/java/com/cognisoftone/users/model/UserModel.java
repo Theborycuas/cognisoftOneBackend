@@ -55,6 +55,9 @@ public class UserModel implements UserDetails {
     )
     private Set<RoleModel> roleModels = new HashSet<>();
 
+    @Column(name = "avatar_url")
+    private String avatarUrl;
+
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
