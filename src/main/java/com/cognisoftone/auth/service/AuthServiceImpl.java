@@ -126,7 +126,7 @@ public class AuthServiceImpl implements AuthService {
                 user.isEnabled(),
                 "qmt6dRyipIad8UCc0QpMV2MENSy1",
                 "identitytoolkit#VerifyPasswordResponse",
-                "qmt6dRyipIad8UCc0QpMV2MENSy1"
+                user.getAvatarUrl()
         );
     }
 
