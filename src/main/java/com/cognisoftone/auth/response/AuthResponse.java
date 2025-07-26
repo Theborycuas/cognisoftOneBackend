@@ -10,6 +10,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AuthResponse {
+    private Long id;
     private String displayName;
     private String email;
     private Set<String> roles;

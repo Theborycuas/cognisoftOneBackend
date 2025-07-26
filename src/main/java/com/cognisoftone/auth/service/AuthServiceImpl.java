@@ -117,6 +117,7 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.save(tokenModel);
 
         return new AuthResponse(
+                user.getId(),
                 user.getFirstName() + user.getLastName(),
                 user.getEmail(),
                 user.getRoleModels().stream().map(RoleModel::getName).collect(Collectors.toSet()),
@@ -161,6 +162,7 @@ public class AuthServiceImpl implements AuthService {
         tokenRepository.save(tokenModel);
 
         return new AuthResponse(
+                user.getId(),
                 user.getFirstName() + user.getLastName(),
                 user.getEmail(),
                 user.getRoleModels().stream().map(RoleModel::getName).collect(Collectors.toSet()),
