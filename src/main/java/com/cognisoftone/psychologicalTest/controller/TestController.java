@@ -61,6 +61,19 @@ public class TestController {
     }
 
     @RequestMapping(
+            value = "/summaryTestList",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> getAllTestSummaries() {
+        log.info("START GET ALL TEST SUMMARIES");
+        var response = testService.getAllTestSummaries();
+        log.info("END GET ALL TEST SUMMARIES");
+        return ResponseEntity.ok(response);
+    }
+
+
+    @RequestMapping(
             value = "/assign",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE,

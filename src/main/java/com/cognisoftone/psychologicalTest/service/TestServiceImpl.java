@@ -7,6 +7,7 @@ import com.cognisoftone.medicalRecord.repository.MedicalRecordRepository;
 import com.cognisoftone.psychologicalTest.dto.CompletedTestDetailDTO;
 import com.cognisoftone.psychologicalTest.dto.CompletedTestSummaryDTO;
 import com.cognisoftone.psychologicalTest.dto.TestAnswerDTO;
+import com.cognisoftone.psychologicalTest.dto.TestSummaryDTO;
 import com.cognisoftone.psychologicalTest.interfaces.TestService;
 import com.cognisoftone.psychologicalTest.model.QuestionModel;
 import com.cognisoftone.psychologicalTest.model.TestAssignment;
@@ -71,6 +72,30 @@ public class TestServiceImpl implements TestService {
     @Override
     public List<TestModel> getAllActiveTests() {
         return testRepository.findByActiveTrue();
+    }
+
+    @Override
+    public List<TestSummaryDTO> getAllTestSummaries() {
+        return testRepository.findAll().stream().map(test -> {
+            int totalQuestions = test.getQuestions().size();
+
+            int estimatedTime = 0;
+            if (totalQuestions <= 9) estimatedTime = 5;
+            else if (totalQuestions <= 21) estimatedTime = 10;
+            else if (totalQuestions <= 30) estimatedTime = 15;
+            else estimatedTime = 20;
+
+            return new TestSummaryDTO(
+                    test.getId(),
+                    test.getName(),
+                    test.getDescription(),
+                    test.getCategory() != null ? test.getCategory().getName() : "Sin categoría",
+                    test.isActive(),
+                    totalQuestions,
+                    estimatedTime,
+                    test.getCreatedAt().toLocalDate()
+            );
+        }).toList();
     }
 
     @Override
