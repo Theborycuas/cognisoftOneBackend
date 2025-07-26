@@ -4,10 +4,7 @@ import com.cognisoftone.common.exception.InvalidTokenException;
 import com.cognisoftone.common.exception.UnprocessableEntityException;
 import com.cognisoftone.medicalRecord.model.MedicalRecord;
 import com.cognisoftone.medicalRecord.repository.MedicalRecordRepository;
-import com.cognisoftone.psychologicalTest.dto.CompletedTestDetailDTO;
-import com.cognisoftone.psychologicalTest.dto.CompletedTestSummaryDTO;
-import com.cognisoftone.psychologicalTest.dto.TestAnswerDTO;
-import com.cognisoftone.psychologicalTest.dto.TestSummaryDTO;
+import com.cognisoftone.psychologicalTest.dto.*;
 import com.cognisoftone.psychologicalTest.interfaces.TestService;
 import com.cognisoftone.psychologicalTest.model.QuestionModel;
 import com.cognisoftone.psychologicalTest.model.TestAssignment;
@@ -25,7 +22,9 @@ import com.cognisoftone.users.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -46,6 +45,9 @@ public class TestServiceImpl implements TestService {
     private final TestResultRepository testResultRepository;
     private final MedicalRecordRepository medicalRecordRepository;
 
+    @Value("${frontend.base-url}")
+    private String frontendBaseUrl;
+
     @Override
     public TestModel createTest(TestModel test) {
         test.setActive(true);
@@ -63,6 +65,29 @@ public class TestServiceImpl implements TestService {
         // Vuelve a guardar el test con las preguntas actualizadas
         return testRepository.save(savedTest);
     }
+
+    @Override
+    public TestDetailDTO getTestWithQuestions(Long testId) {
+        TestModel test = testRepository.findById(testId)
+                .orElseThrow(() -> new EntityNotFoundException("Test not found"));
+
+        List<QuestionDTO> questionDTOs = test.getQuestions().stream().map(q ->
+                new QuestionDTO(
+                        q.getId(),
+                        q.getStatement(),
+                        q.getType(),
+                        q.getOptions()
+                )
+        ).toList();
+
+        return new TestDetailDTO(
+                test.getId(),
+                test.getName(),
+                test.getDescription(),
+                questionDTOs
+        );
+    }
+
 
     @Override
     public Optional<TestModel> getTestById(Long id) {
@@ -117,7 +142,7 @@ public class TestServiceImpl implements TestService {
 
         assignmentRepository.save(assignment);
 
-        String link = "https://tusistema.com/psycologicalTests/link/" + token;
+        String link = frontendBaseUrl + "/psycologicalTests/link/" + token;
 
         return new AssignTestResponse(link, expiresAt);
     }

@@ -20,7 +20,6 @@ public interface UserRepository extends JpaRepository<UserModel, Long> {
         SELECT DISTINCT a.patientId
         FROM Appointment a
         WHERE a.psychologistId = :psychologistId
-          AND a.status = 'COMPLETED'
     )
     """)
     List<UserModel> findPatientsOfPsychologist(@Param("psychologistId") Long psychologistId);

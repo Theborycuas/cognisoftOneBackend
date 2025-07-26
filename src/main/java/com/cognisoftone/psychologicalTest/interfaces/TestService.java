@@ -2,6 +2,7 @@ package com.cognisoftone.psychologicalTest.interfaces;
 
 import com.cognisoftone.psychologicalTest.dto.CompletedTestDetailDTO;
 import com.cognisoftone.psychologicalTest.dto.CompletedTestSummaryDTO;
+import com.cognisoftone.psychologicalTest.dto.TestDetailDTO;
 import com.cognisoftone.psychologicalTest.dto.TestSummaryDTO;
 import com.cognisoftone.psychologicalTest.model.TestModel;
 import com.cognisoftone.psychologicalTest.request.AssignTestRequest;
@@ -24,5 +25,7 @@ public interface TestService {
     List<CompletedTestSummaryDTO> getCompletedTestsByUser(Long userId);
     CompletedTestDetailDTO getCompletedTestDetail(Long userId, Long testId);
 
+    TestDetailDTO getTestWithQuestions(Long testId);
     List<TestSummaryDTO> getAllTestSummaries();
+
 }

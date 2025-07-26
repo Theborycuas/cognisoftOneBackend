@@ -37,6 +37,19 @@ public class TestController {
     }
 
     @RequestMapping(
+            value = "/{id}/full",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<?> getTestFull(@PathVariable Long id) {
+        log.info("START GET FULL TEST {}", id);
+        var response = testService.getTestWithQuestions(id);
+        log.info("END GET FULL TEST {}", id);
+        return ResponseEntity.ok(response);
+    }
+
+
+    @RequestMapping(
             value = "/{id}",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE
